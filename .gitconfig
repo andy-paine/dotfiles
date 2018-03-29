@@ -1,0 +1,22 @@
+[alias]
+	st = status
+	co = checkout
+	cob = checkout -b
+	diffs = diff --staged
+	rebcon = rebase --continue
+	rebab = rebase --abort
+	blist = branch --list
+	cam = commit --amend
+	camne = commit --amend --no-edit
+        woops = reset --hard origin/master
+
+        # From github CLI if installed
+	pr = !sh -c 'which -s hub && pull-request || echo "Github CLI not installed"'
+[core]
+	editor = vim
+[push]
+	default = current
+
+# For user details per-machine
+[include]
+      path = ~/.gitconfig_user
