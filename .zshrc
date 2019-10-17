@@ -22,11 +22,9 @@ export VISUAL=vim
 
 export NVM_DIR="$HOME/.nvm"
 . "/usr/local/opt/nvm/nvm.sh"
-# Hard change over
-alias emacs=vim
+alias vim=nvim
 # Useful for editing + getting changes - only works in single tab
-alias vimrc="vim ~/.vimrc"
-alias bashrc="vim ~/.bashrc && source ~/.bashrc"
+alias vimrc="vim ~/.config/nvim/init.vim"
 alias zshrc="vim ~/.zshrc && source ~/.zshrc"
 # Getting ctags to work on OSX
 alias ctags="`brew --prefix`/bin/ctags"
