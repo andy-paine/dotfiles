@@ -1,42 +1,30 @@
 bindkey -v
 
-function dkill {
-  docker ps -f name="$1" --format "{{ .Names }}" | xargs docker kill
-}
-function dlogs {
-  docker logs ${@:2} $(docker ps -f name="$1" --format "{{ .Names }}")
-}
-
-function dbpwd {
-  aws kms decrypt --ciphertext-blob \
-    fileb://<(cat ~/Projects/verify-event-infrastructure/environments/$1/site.tf | hclq get -r "module.recording_system.event-store-password" | sed "s/\"//g" | base64 -D) \
-     --query Plaintext --output text | base64 -D | pbcopy
-  echo "$1 DB password copied to clipboard"
-}
-
-eval "$(rbenv init -)"
-export JAVA_HOME=$(/usr/libexec/java_home)
-export PATH="/usr/local/sbin:$PATH"
+. /usr/local/etc/profile.d/z.sh
+export JAVA_HOME=/usr/local/opt/openjdk@12/libexec/openjdk.jdk/Contents/Home
+export PATH="/usr/local/opt/libressl/bin:${KREW_ROOT:-$HOME/.krew}/bin:/usr/local/opt/openjdk@12/bin:/usr/local/sbin:~/go/bin/:/usr/local/bin:$HOME/.pub-cache/bin:$PATH"
+eval "$(rbenv init - --no-rehash)"
 export COMPOSE_IGNORE_ORPHANS=true
-export VISUAL=vim
+export VISUAL=nvim
+export EDITOR=nvim
+export GIT_DUET_ROTATE_AUTHOR=true
+export AWS_VAULT_PROMPT=ykman
 
 export NVM_DIR="$HOME/.nvm"
 . "/usr/local/opt/nvm/nvm.sh"
 alias vim=nvim
+alias vimdiff="nvim -d"
 # Useful for editing + getting changes - only works in single tab
 alias vimrc="vim ~/.config/nvim/init.vim"
 alias zshrc="vim ~/.zshrc && source ~/.zshrc"
 # Getting ctags to work on OSX
 alias ctags="`brew --prefix`/bin/ctags"
-# Useful way to view SAML in terminal
-alias decode="base64 -D | xmllint --format -"
-# Alias for Github CLI (delegates to normal git where relevant)
-alias git=hub
 # Classic typo
 alias gti=git
-alias gst="git status"
+alias bish=bosh
 alias "ga."="git add ."
-alias gitk=/usr/local/bin/git/bin/gitk
+alias gap="git add -p"
+alias tst="tig status"
 # Recursive search of directory whilst ignoring typically noisy search paths
 alias dc=docker-compose
 alias drun="docker run -it --entrypoint sh"
@@ -45,7 +33,30 @@ alias mkx="chmod +x"
 alias jws="cut -f 2 -d . - | base64 -D | jq"
 alias cert="openssl x509 -noout -in"
 alias tf=terraform
-alias tfplan="terraform plan | landscape"
+alias ky="kubectl -o yaml"
+alias kd="kubectl describe"
+alias krunning="k get pod -o jsonpath='{range $.status.containerStatuses[*]}{.ready}{\":\t\"}{.name}{\"\n\"}{end}'"
+
+function kevents {
+  kubectl get events --field-selector involvedObject.kind=Pod,involvedObject.name=$1
+}
+
+function ks {
+  kubectl get secret -o json $@ | jq -r 'map_values(@base64d)'
+}
+
+function kk {
+  kubectl get -oyaml $@ | less
+}
+
+function kl {
+  kubectl get -o jsonpath='{$.metadata.labels}' $@ | jq
+}
+
+function ka {
+  kubectl get ${1:-all} --all-namespaces --field-selector 'metadata.namespace!=kube-system,metadata.namespace!=istio-system' --ignore-not-found
+}
+
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 . /usr/local/etc/profile.d/z.sh
@@ -108,13 +119,16 @@ COMPLETION_WAITING_DOTS="true"
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(
-  git, cf
+  git kubectl docker docker-compose
 )
 
 # Enable Ctrl-x-e to edit command line
 autoload -U edit-command-line
 
 source $ZSH/oh-my-zsh.sh
+autoload -U colors; colors
+#source ~/.config/zsh/kubectl/kubectl.zsh
+RPROMPT='%{$fg[blue]%}($ZSH_KUBECTL_PROMPT)%{$reset_color%}'
 
 # User configuration
 
@@ -145,3 +159,8 @@ export SSH_AUTH_SOCK=~/.gnupg/S.gpg-agent.ssh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
+
+
+autoload -U +X bashcompinit && bashcompinit
+source <(fly completion --shell zsh)
+source <(k completion zsh)

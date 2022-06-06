@@ -5,18 +5,32 @@
 	diffs = diff --staged
 	rebcon = rebase --continue
 	rebab = rebase --abort
+  cp = cherry-pick
+  cpc = cherry-pick --continue
+  cpa = cherry-pick --abort
 	blist = branch --list
 	cam = commit --amend
 	camne = commit --amend --no-edit
-        woops = reset --hard origin/master
-
-        # From github CLI if installed
-	pr = !sh -c 'which -s hub && pull-request || echo "Github CLI not installed"'
+  pra = pull --rebase --autostash
+  woops = reset --hard origin/master
+  woopsy = reset --hard origin/main
+  fix = commit --fixup
+  squish = -c sequence.editor=: rebase --autosquash --interactive
 [core]
-	editor = vim
+	editor = nvim
 [push]
 	default = current
+[pull]
+	rebase = true
+[commit]
+	gpgsign = true
+[format]
+  signOff = true
+[delta]
+  plus-color = "#012800"
+  minus-color = "#340001"
+  syntax-theme = Monokai Extended
 
 # For user details per-machine
 [include]
-      path = ~/.gitconfig_user
+  path = ~/.gitconfig_user
